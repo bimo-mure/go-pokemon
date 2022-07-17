@@ -1,0 +1,50 @@
+{{template "base" .}}
+
+{{define "title"}}
+    Perpustakaan
+{{end}}
+
+{{define "content"}}
+<div class="container py-5">
+
+  <div class="row mb-4">
+    <div class="col-lg-8 mx-auto text-center">
+      <h1 class="display-4">Pokemon</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-7 mx-auto">
+      <div class="bg-white rounded-lg shadow-sm p-5">
+        <!-- Perpus form content -->
+        <div class="tab-content">
+          <!-- End -->
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">No</th>
+                <th scope="col">Pokemon</th>
+              </tr>
+            </thead>
+            <tbody>
+             {{range $index, $element := .ListPokemon}}
+              <tr>
+                <th scope="row">{{$index}}</th>
+                <td>{{$element.Name}}</td>
+                <td><a href = {{$element.Url}} target = "_self">Select</a></td>
+              </tr>
+              {{end}}
+            </tbody>
+          </table>
+        </div>
+        <!-- End -->
+
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}
+
+{{define "js"}}
+    
+{{end}}
