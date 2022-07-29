@@ -16,9 +16,10 @@ import (
 const version = "1.0.0"
 
 type config struct {
-	port int
-	env  string
-	db   struct {
+	port   int
+	env    string
+	apiurl string
+	db     struct {
 		dsn string
 	}
 }
@@ -51,6 +52,7 @@ func main() {
 	var cfg config
 
 	flag.IntVar(&cfg.port, "port", 8080, "Server port to listen on")
+	flag.StringVar(&cfg.apiurl, "apiurl", "https://pokeapi.co/api/v2/", "Pokemon API url")
 	flag.StringVar(&cfg.env, "env", "development", "Application enviorment {development|production}")
 	flag.StringVar(&cfg.db.dsn, "dsn", "root:A19uxwkpfv96!@tcp(localhost:3306)/perpustakaan?parseTime=false", "DSN")
 	flag.Parse()

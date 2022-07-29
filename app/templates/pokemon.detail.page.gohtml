@@ -1,0 +1,72 @@
+{{template "base" .}}
+
+{{define "title"}}
+    Pokemon GO
+{{end}}
+
+{{define "content"}}
+<div class="container">
+
+  <div class="row">
+    <div class="col-lg-8 mx-auto text-center">
+      <h1 class="display-4">Pokemon</h1>
+    </div>
+  </div>
+
+    <div class="row shadow p-3 mb-5 bg-body rounded">
+        <div class="col-md-4">
+            <div class="card border-secondary text-center shadow p-3 mb-5 bg-body rounded" style="width: 18rem;">
+                <img class="card-img-top" src={{.PokemonDetail.Image}} alt="Card image cap">
+                <div class="card-body">
+                    <h5 class="card-title">{{.PokemonDetail.Name}}</h5>
+                    {{range $index, $element := .PokemonDetail.Types}}
+                        <span class="badge badge-pill badge-info">{{$element}}</span>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <canvas id="myChart" style="width:100%;"></canvas>
+        </div>
+         <div class="col-md-12">
+            <h4> Moves :</h4>
+            {{range $index, $element := .PokemonDetail.Moves}}
+                <span class="badge badge-pill badge-light">{{$element}}</span>
+            {{end}}
+        </div>
+    </div>
+
+</div>
+
+{{end}}
+
+{{define "js"}}
+    <script>
+
+    var xValues = ["HP", "Attack", "Defense", "Special Attack", "Special Defense", "Speed"];
+    var yValues = [55, 49, 44, 24, 15, 20, 89];
+    var barColors = ["green", "red","blue","orange","brown"];
+
+    new Chart("myChart", {
+        type: "horizontalBar",
+        data: {
+            labels: xValues,
+            datasets: [{
+                backgroundColor: barColors,
+                data: yValues
+            }]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Pokemon Stats'
+            },
+            legend: {
+                display: false,
+            }
+        }
+        
+    });
+
+  </script>
+{{end}}

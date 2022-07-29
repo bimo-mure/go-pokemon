@@ -1,7 +1,7 @@
 {{template "base" .}}
 
 {{define "title"}}
-    Perpustakaan
+    Pokemon GO
 {{end}}
 
 {{define "content"}}
@@ -13,38 +13,42 @@
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-lg-7 mx-auto">
-      <div class="bg-white rounded-lg shadow-sm p-5">
-        <!-- Perpus form content -->
-        <div class="tab-content">
-          <!-- End -->
-          <table class="table">
-            <thead>
-              <tr>
-                <th scope="col">No</th>
-                <th scope="col">Pokemon</th>
-              </tr>
-            </thead>
-            <tbody>
-             {{range $index, $element := .ListPokemon}}
-              <tr>
-                <th scope="row">{{$index}}</th>
-                <td>{{$element.Name}}</td>
-                <td><a href = {{$element.Url}} target = "_self">Select</a></td>
-              </tr>
-              {{end}}
-            </tbody>
-          </table>
+  <div class="row shadow p-3 mb-5 bg-body rounded">
+    <div class="col-md-12">
+      <div class="card-columns">
+        {{range $index, $element := .PokemonList}}
+        <div class="cards">
+          <div class="card border-secondary text-center" onclick="detail({{$element.Name}})" href>
+            <img class="card-img-top" src={{$element.Image}} alt="Card image cap">
+            <div class="card-body">
+              <h5 class="card-title">{{$element.Name}}</h5>
+            </div>
+          </div>
         </div>
-        <!-- End -->
-
+        {{end}}
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  .cards{
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+    
+  .cards:hover{
+      box-shadow: 5px 6px 6px 2px #e9ecef;
+      transform: scale(1.1);
+  }
+</style>
 {{end}}
 
 {{define "js"}}
-    
+    <script>
+
+    function detail(name) {
+      window.location = 'http://localhost:8080/pokemon-detail/' + name;
+    }
+  </script>
 {{end}}

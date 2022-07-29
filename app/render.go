@@ -6,12 +6,15 @@ import (
 	"html/template"
 	"net/http"
 	"strings"
+
+	"github.com/dev-bimomure/go-pokemon/app/structs"
 )
 
 type templateData struct {
-	StringMap   map[string]string
-	Data        map[string]interface{}
-	ListPokemon []Pokemon
+	StringMap     map[string]string
+	Data          map[string]interface{}
+	PokemonList   []structs.PokemonSource
+	PokemonDetail structs.PokemonDetail
 }
 
 var function = template.FuncMap{}
