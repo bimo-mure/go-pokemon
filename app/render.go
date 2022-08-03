@@ -15,6 +15,7 @@ type templateData struct {
 	Data          map[string]interface{}
 	PokemonList   []structs.PokemonSource
 	PokemonDetail structs.PokemonDetail
+	MyPokemonList []structs.MyPokemon
 }
 
 var function = template.FuncMap{}

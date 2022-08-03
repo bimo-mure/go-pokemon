@@ -7,25 +7,84 @@
 {{define "content"}}
 <div class="container py-5">
 
-  <div class="row mb-4">
-    <div class="col-lg-8 mx-auto text-center">
-      <h1 class="display-4">Pokemon</h1>
+  <div id="processing-catch" class="text-center d-none">
+    <div class="spinner-border text-warning" role="status">
+        <span class="visually-hidden"></span>
     </div>
   </div>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="http://localhost:8080/pokemon-list">Pokemon</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="http://localhost:8080/pokemon-list">Pokemon List <span class="sr-only">(current)</span></a>
+        <a class="nav-item nav-link" href="http://localhost:8080/my-pokemon">My Pokemon</a>
+      </div>
+    </div>
+  </nav>
 
   <div class="row shadow p-3 mb-5 bg-body rounded">
     <div class="col-md-12">
       <div class="card-columns">
         {{range $index, $element := .PokemonList}}
         <div class="cards">
-          <div class="card border-secondary text-center" onclick="detail({{$element.Name}})" href>
-            <img class="card-img-top" src={{$element.Image}} alt="Card image cap">
+          <div class="card border-secondary text-center">
+            <img class="card-img-top" src={{$element.Image}} alt="Card image cap" onclick="detail({{$element.Name}})" href>
             <div class="card-body">
               <h5 class="card-title">{{$element.Name}}</h5>
+              <button type="button" class="btn btn-warning btn-sm" onclick="catchPokemon({{$element.Name}}, {{$element.Image}})">Catch Pokemon</button>
             </div>
           </div>
         </div>
         {{end}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Success-->
+<div class="modal fade" id="modalSuccess" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center">Success Catch Pokemon!</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <img src="" alt="avatar" id="pokemonModelAvatar">
+          <h5 class="mt-1 mb-2 text-center" id="pokemonModalTitle"></h5>
+        <form>
+          <div class="form-group">
+            <label for="pokemon-nickname" class="col-form-label">NickName:</label>
+            <textarea class="form-control" id="pokemon-nickname"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer text-center">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Release</button>
+        <button type="button" class="btn btn-warning" onclick="saveModal();">Catch!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Fail -->
+<div class="modal fade" id="modalFail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center">Failed Catch Pokemon</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -47,8 +106,111 @@
 {{define "js"}}
     <script>
 
+    const Message = document.getElementById("pokemon-messages");
+    const processing = document.getElementById("processing-catch");
+    const ModalTitle = document.getElementById("pokemonModalTitle");
+    const ModalAvatar = document.getElementById("pokemonModelAvatar");
+
     function detail(name) {
       window.location = 'http://localhost:8080/pokemon-detail/' + name;
+    }
+
+    function showLoading() {
+      processing.classList.remove("d-none");
+    }
+
+    function HideLoading() {
+      processing.classList.add("d-none");
+    }
+
+    function ShowModal(name, image){
+      ModalTitle.innerHTML = name
+      ModalAvatar.src = image
+      $('#modalSuccess').modal('show')
+    }
+
+    function showModalFail(){
+      $('#modalFail').modal('show')
+    }
+
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function saveModal(){
+      insertPokemon(ModalTitle.innerHTML, document.getElementById("pokemon-nickname").value, ModalAvatar.src)
+      $("#modalSuccess").modal("hide");
+    }
+
+    $('#modalSuccess').on('hidden.bs.modal', function (e) {
+      document.getElementById("pokemon-nickname").value = ""
+    })
+
+    function insertPokemon(name, nickname, img){
+      let payload = {
+          pokemon_name : name,
+          nick_name: nickname,
+          image : img
+        }
+
+      const requestOptions = {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body : JSON.stringify(payload),
+      }
+
+      fetch("http://localhost:8080/save-pokemon", requestOptions)
+        .then(response => response.text())
+        .then(response => {
+            let data;
+            try{
+              data = JSON.parse(response)
+              console.log(data)
+            } catch (err) {
+              console.log(err)
+            }
+        })
+    }
+
+    async function catchPokemon(name, image){
+        let payload = {
+          pokemon_name : name,
+          nick_name: '',
+          image : ''
+        }
+        showLoading();
+        await sleep(2000);
+        const requestOptions = {
+          method: 'post',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body : JSON.stringify(payload),
+        }
+
+        fetch("http://localhost:8080/catch-pokemon", requestOptions)
+        .then(response => response.text())
+        .then(response => {
+            let data;
+            try{
+              data = JSON.parse(response)
+              if(data.Result === 1) {
+                HideLoading()
+                console.log(data)
+                ShowModal(name, image);
+              } else {
+                HideLoading()
+                console.log(data)
+                showModalFail();
+              }
+            } catch (err) {
+              console.log(err)
+            }
+        })
     }
   </script>
 {{end}}

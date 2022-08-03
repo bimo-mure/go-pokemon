@@ -1,0 +1,119 @@
+{{template "base" .}}
+
+{{define "title"}}
+    Pokemon GO
+{{end}}
+
+{{define "content"}}
+<div class="container py-5">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="http://localhost:8080/pokemon-list">Pokemon</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+            <a class="nav-item nav-link" href="http://localhost:8080/pokemon-list">Pokemon List <span class="sr-only">(current)</span></a>
+            <a class="nav-item nav-link active" href="http://localhost:8080/my-pokemon">My Pokemon</a>
+        </div>
+        </div>
+    </nav>
+
+  <div class="row shadow p-3 mb-5 bg-body rounded">
+    <div class="col-md-12">
+      <div class="card-columns">
+        {{range $index, $element := .MyPokemonList}}
+        <div class="cards">
+          <div class="card border-secondary text-center">
+            <img class="card-img-top" src={{$element.Image}} alt="Card image cap" onclick="detail({{$element.PokemonName}})" href>
+            <div class="card-body">
+                <h5 class="card-title">{{$element.NickName}}</h5>
+                <button type="button" class="btn btn-primary btn-sm">Rename</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="releasePokemon({{$element.Id}})">Release</button>
+                <input type="hidden" id="PokemonName" name="PokemonName" value={{$element.PokemonName}}>
+                <input type="hidden" id="PokemonId" name="PokemonId" value={{$element.Id}}>
+            </div>
+          </div>
+        </div>
+        {{end}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .cards{
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+    
+  .cards:hover{
+      box-shadow: 5px 6px 6px 2px #e9ecef;
+      transform: scale(1.1);
+  }
+</style>
+
+{{end}}
+
+{{define "js"}}
+  <script>
+    function detail(name) {
+      window.location = 'http://localhost:8080/pokemon-detail/' + name;
+    }
+
+    function releasePokemon(pokemon_id){
+        const requestOptions = {
+          method: 'get',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+        }
+
+        fetch("http://localhost:8080/get-prime-number", requestOptions)
+          .then(response => response.text())
+          .then(response => {
+              let data;
+              try{
+                data = JSON.parse(response)
+                console.log(data)
+                if(data.IsPrime === true) {
+                  deletePokemon(pokemon_id)
+                }else {
+                  
+                }
+              } catch (err) {
+                console.log(err)
+              }
+          })
+      }
+
+      function deletePokemon(pokemon_id){
+        let payload = {
+            id : pokemon_id,
+          }
+
+        const requestOptions = {
+          method: 'delete',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body : JSON.stringify(payload),
+        }
+
+        fetch("http://localhost:8080/release-pokemon", requestOptions)
+          .then(response => response.text())
+          .then(response => {
+              let data;
+              try{
+                data = JSON.parse(response)
+                console.log(data)
+              } catch (err) {
+                console.log(err)
+              }
+          })
+      }
+  </script>
+{{end}}

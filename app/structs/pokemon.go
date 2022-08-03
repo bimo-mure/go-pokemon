@@ -102,4 +102,21 @@ type PokemonDetail struct {
 	Name  string
 	Moves []string
 	Types []string
+	Stats PokemonStats
+}
+
+type PokemonStats struct {
+	HP             int
+	Attack         int
+	Defense        int
+	SpecialAttack  int
+	SpecialDefense int
+	Speed          int
+}
+
+type MyPokemon struct {
+	Id          int    `json:"id"`
+	PokemonName string `json:"pokemon_name"`
+	NickName    string `json:"nick_name"`
+	Image       string `json:"image"`
 }

@@ -7,11 +7,18 @@
 {{define "content"}}
 <div class="container">
 
-  <div class="row">
-    <div class="col-lg-8 mx-auto text-center">
-      <h1 class="display-4">Pokemon</h1>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="http://localhost:8080/pokemon-list">Pokemon</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="http://localhost:8080/pokemon-list">Pokemon List <span class="sr-only">(current)</span></a>
+        <a class="nav-item nav-link" href="http://localhost:8080/my-pokemon">My Pokemon</a>
+      </div>
     </div>
-  </div>
+  </nav>
 
     <div class="row shadow p-3 mb-5 bg-body rounded">
         <div class="col-md-4">
@@ -36,6 +43,14 @@
         </div>
     </div>
 
+    <input type="hidden" id="HP" name="HP" value={{.PokemonDetail.Stats.HP}}>
+    <input type="hidden" id="Attack" name="Attack" value={{.PokemonDetail.Stats.Attack}}>
+    <input type="hidden" id="Defense" name="Defense" value={{.PokemonDetail.Stats.Defense}}>
+    <input type="hidden" id="SAttack" name="SAttack" value={{.PokemonDetail.Stats.SpecialAttack}}>
+    <input type="hidden" id="SDefense" name="SDefense" value={{.PokemonDetail.Stats.SpecialDefense}}>
+    <input type="hidden" id="Speed" name="Speed" value={{.PokemonDetail.Stats.Speed}}>
+    
+
 </div>
 
 {{end}}
@@ -43,17 +58,43 @@
 {{define "js"}}
     <script>
 
-    var xValues = ["HP", "Attack", "Defense", "Special Attack", "Special Defense", "Speed"];
-    var yValues = [55, 49, 44, 24, 15, 20, 89];
-    var barColors = ["green", "red","blue","orange","brown"];
+    let HP = document.getElementById("HP").value;
+    let Attack = document.getElementById("Attack").value;
+    let Defense = document.getElementById("Defense").value;
+    let SAttack = document.getElementById("SAttack").value;
+    let SDefense = document.getElementById("SDefense").value;
+    let Speed = document.getElementById("Speed").value;
+
+    var Stats = ["HP", "Attack", "Defense", "Speed", "Special Attack", "Special Defense"];
+    var dataVal = [HP, Attack, Defense, Speed, SAttack, SDefense];
+    var barColors = [];
+
+
+    for(i = 0; i < dataVal.length; i++) {
+        if(dataVal[i] <= 45) {
+            barColors.push('#BE0000')
+        }
+        if(dataVal[i] > 45 && dataVal[i] <= 60 ) {
+            barColors.push('#E48900')
+        }
+        if(dataVal[i] > 60 && dataVal[i] <= 80 ) {
+            barColors.push('#E6DD3B')
+        }
+        if(dataVal[i] > 80 && dataVal[i] <= 100) {
+            barColors.push('#29BB89')
+        }
+        if(dataVal[i] > 100 ) {
+            barColors.push('#1E6F5C')
+        }
+    }
 
     new Chart("myChart", {
         type: "horizontalBar",
         data: {
-            labels: xValues,
+            labels: Stats,
             datasets: [{
                 backgroundColor: barColors,
-                data: yValues
+                data: dataVal
             }]
         },
         options: {
@@ -63,7 +104,20 @@
             },
             legend: {
                 display: false,
-            }
+            },
+            scales: {
+                xAxes: [
+                    {
+                        display: true,
+                        ticks: {
+                            steps: 10,
+                            stepValue: 5,
+                            min: 20,
+                            max: 140
+                        }
+                    }
+                ],
+            },
         }
         
     });
