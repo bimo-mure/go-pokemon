@@ -73,18 +73,18 @@
   </div>
 </div>
 
-<!-- Modal Fail -->
-<div class="modal fade" id="modalFail" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<!-- Modal Notification -->
+<div class="modal fade" id="modalNotif" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-center">Failed Catch Pokemon</h5>
+        <h5 class="modal-title text-center" id="modal-title-notif"></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
@@ -106,10 +106,10 @@
 {{define "js"}}
     <script>
 
-    const Message = document.getElementById("pokemon-messages");
     const processing = document.getElementById("processing-catch");
     const ModalTitle = document.getElementById("pokemonModalTitle");
     const ModalAvatar = document.getElementById("pokemonModelAvatar");
+    const ModalTitleNotif = document.getElementById("modal-title-notif");
 
     function detail(name) {
       window.location = 'http://localhost:8080/pokemon-detail/' + name;
@@ -129,8 +129,9 @@
       $('#modalSuccess').modal('show')
     }
 
-    function showModalFail(){
-      $('#modalFail').modal('show')
+    function showModalNotif(msg){
+      ModalTitleNotif.innerHTML = msg
+      $('#modalNotif').modal('show')
     }
 
     function sleep(ms) {
@@ -168,6 +169,7 @@
             let data;
             try{
               data = JSON.parse(response)
+              showModalNotif("Pokemon added in My Pokemon :D")
               console.log(data)
             } catch (err) {
               console.log(err)
@@ -182,7 +184,7 @@
           image : ''
         }
         showLoading();
-        await sleep(2000);
+        await sleep(1500);
         const requestOptions = {
           method: 'post',
           headers: {
@@ -205,7 +207,7 @@
               } else {
                 HideLoading()
                 console.log(data)
-                showModalFail();
+                showModalNotif("Failed catch Pokemon, try again!");
               }
             } catch (err) {
               console.log(err)

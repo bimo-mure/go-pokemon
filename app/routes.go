@@ -15,6 +15,7 @@ func (app *application) routes() http.Handler {
 	mux.GET("/get-prime-number", app.GetPrimeNumber)
 	mux.POST("/save-pokemon", app.SavePokemon)
 	mux.POST("/catch-pokemon", app.CatchPokemon)
+	mux.POST("/rename-pokemon", app.RenamePokemon)
 	mux.DELETE("/release-pokemon", app.ReleasePokemon)
 
 	return mux

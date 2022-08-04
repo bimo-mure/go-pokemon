@@ -29,7 +29,7 @@ type GetNumberResponse struct {
 	IsPrime bool
 }
 
-type DeleteResponse struct {
+type GeneralResponse struct {
 	Code         int
 	RowsAffected int
 	Message      string
@@ -39,8 +39,9 @@ func (app *application) PokemonList(w http.ResponseWriter, r *http.Request, _ ht
 	var result structs.Pokemon
 	var list []structs.PokemonSource
 
-	for i := 0; i < 10; i++ {
-		pokemon, err := app.callPokeAPI(fmt.Sprintf("pokemon/%d", i+1))
+	for i := 0; i < 9; i++ {
+		randomPokemonId := GenerateRandomNumberPokemon()
+		pokemon, err := app.callPokeAPI(fmt.Sprintf("pokemon/%d", randomPokemonId))
 		if err != nil {
 			app.errorLog.Println(err)
 		}
@@ -123,17 +124,21 @@ func (app *application) MyPokemon(w http.ResponseWriter, r *http.Request, _ http
 func (app *application) SavePokemon(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	bodyReq, _ := ioutil.ReadAll(r.Body)
 	var pokemon structs.MyPokemon
+	var code int
+	message := fmt.Sprintf("Successfully Insert Pokemon %s", pokemon.PokemonName)
+
 	json.Unmarshal(bodyReq, &pokemon)
 	_, err := app.DB.InsertPokemon(pokemon)
 	if err != nil {
 		app.errorLog.Println(err)
-		return
+		code = 500
+		message = "Internal Server error"
 	}
 
 	result := PokeResponse{
-		Code:    200,
+		Code:    code,
 		Data:    pokemon,
-		Message: fmt.Sprintf("Successfully Insert Pokemon %s", pokemon.PokemonName),
+		Message: message,
 	}
 	res, err := json.Marshal(result)
 	if err != nil {
@@ -224,16 +229,61 @@ func (app *application) ReleasePokemon(w http.ResponseWriter, r *http.Request, _
 	bodyReq, _ := ioutil.ReadAll(r.Body)
 	var pokemon structs.MyPokemon
 	json.Unmarshal(bodyReq, &pokemon)
-	rowsAffected, err := app.DB.DeletePokemon(pokemon)
+	rowsAffected, err := app.DB.DeletePokemon(pokemon.Id)
 	if err != nil {
 		app.errorLog.Println(err)
 		return
 	}
 
-	result := DeleteResponse{
+	result := GeneralResponse{
 		Code:         200,
 		RowsAffected: rowsAffected,
 		Message:      fmt.Sprintf("Successfully Delete Pokemon %s", pokemon.PokemonName),
+	}
+	res, err := json.Marshal(result)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(res)
+}
+
+func (app *application) RenamePokemon(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	bodyReq, _ := ioutil.ReadAll(r.Body)
+	var pokemon structs.MyPokemon
+	json.Unmarshal(bodyReq, &pokemon)
+
+	var newNickname string
+	var countUpdate int
+
+	lastUpdate, err := app.DB.GetPokemonLastCountById(pokemon.Id)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	if lastUpdate > 0 {
+		countUpdate = lastUpdate + 1
+		fib := Fibonacci(countUpdate)
+		newNickname = fmt.Sprintf("%s-%d", pokemon.NickName, fib)
+	} else {
+		newNickname = fmt.Sprintf("%s-%d", pokemon.NickName, 0)
+		countUpdate = 1
+	}
+
+	rowsAffected, err := app.DB.UpdatePokemon(pokemon.Id, newNickname, countUpdate)
+	if err != nil {
+		app.errorLog.Println(err)
+		return
+	}
+
+	result := GeneralResponse{
+		Code:         200,
+		RowsAffected: rowsAffected,
+		Message:      fmt.Sprintf("Successfully Update nickname %s with id %d", newNickname, pokemon.Id),
 	}
 	res, err := json.Marshal(result)
 	if err != nil {

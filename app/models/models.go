@@ -67,13 +67,13 @@ func (m *DBModel) InsertPokemon(pkm structs.MyPokemon) (int, error) {
 	return int(id), nil
 }
 
-func (m *DBModel) DeletePokemon(pkm structs.MyPokemon) (int, error) {
+func (m *DBModel) DeletePokemon(pokemonId int) (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	delete := `DELETE FROM my_pokemon WHERE id = ?`
 
-	result, err := m.DB.ExecContext(ctx, delete, pkm.Id)
+	result, err := m.DB.ExecContext(ctx, delete, pokemonId)
 	if err != nil {
 		return 0, err
 	}
@@ -84,4 +84,37 @@ func (m *DBModel) DeletePokemon(pkm structs.MyPokemon) (int, error) {
 	}
 
 	return int(rowDeleted), nil
+}
+
+func (m *DBModel) UpdatePokemon(pokemonId int, newNickname string, updateCount int) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	updatePoke := `UPDATE my_pokemon SET nick_name = ?, update_count = ? WHERE id = ?`
+
+	result, err := m.DB.ExecContext(ctx, updatePoke, newNickname, updateCount, pokemonId)
+	if err != nil {
+		return 0, err
+	}
+
+	rowUpdated, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(rowUpdated), nil
+}
+
+func (m *DBModel) GetPokemonLastCountById(pokemonId int) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	var count int
+	stmt := `SELECT update_count FROM my_pokemon WHERE id = ?`
+	row := m.DB.QueryRowContext(ctx, stmt, pokemonId)
+	err := row.Scan(&count)
+	if err != nil {
+		return count, err
+	}
+
+	return count, nil
 }

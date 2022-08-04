@@ -29,14 +29,77 @@
             <img class="card-img-top" src={{$element.Image}} alt="Card image cap" onclick="detail({{$element.PokemonName}})" href>
             <div class="card-body">
                 <h5 class="card-title">{{$element.NickName}}</h5>
-                <button type="button" class="btn btn-primary btn-sm">Rename</button>
-                <button type="button" class="btn btn-danger btn-sm" onclick="releasePokemon({{$element.Id}})">Release</button>
-                <input type="hidden" id="PokemonName" name="PokemonName" value={{$element.PokemonName}}>
-                <input type="hidden" id="PokemonId" name="PokemonId" value={{$element.Id}}>
+                <button type="button" class="btn btn-primary btn-sm" onclick="ShowModalRename({{$element.Image}}, {{$element.Id}})">Rename</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="showModalConfirm({{$element.Id}})">Release</button>
             </div>
           </div>
         </div>
         {{end}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Notification -->
+<div class="modal fade" id="modalNotif" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center" id="modal-title-notif"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Rename-->
+<div class="modal fade" id="modalRename" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center">Rename your Pokemon</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <img src="" alt="avatar" id="pokemonModelAvatar">
+          <h5 class="mt-1 mb-2 text-center" id="pokemonModalTitle"></h5>
+        <form>
+          <div class="form-group">
+            <label for="pokemon-nickname" class="col-form-label">New NickName:</label>
+            <textarea class="form-control" id="pokemon-nickname"></textarea>
+            <input type="hidden" id="PokemonId" name="PokemonId">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer text-center">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">cancel</button>
+        <button type="button" class="btn btn-warning" onclick="saveModal();">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirm-->
+<div class="modal fade" id="modalConfirm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center">Are you sure ?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-footer">
+        <input type="hidden" id="PokemonIdConfirm" name="PokemonIdConfirm">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">No</button>
+        <button type="button" class="btn btn-danger" onclick="confirmModal();">Yes</button>
       </div>
     </div>
   </div>
@@ -58,62 +121,131 @@
 
 {{define "js"}}
   <script>
+
+    const ModalTitleNotif = document.getElementById("modal-title-notif");
+    const ModalTitle = document.getElementById("pokemonModalTitle");
+    const ModalAvatar = document.getElementById("pokemonModelAvatar");
+    const ModalPokemonId = document.getElementById("PokemonId");
+    const PokemonIdConfirm = document.getElementById("PokemonIdConfirm");
+
     function detail(name) {
       window.location = 'http://localhost:8080/pokemon-detail/' + name;
     }
 
+    function ShowModalRename(image, id){
+      ModalAvatar.src = image
+      ModalPokemonId.value = id
+      $('#modalRename').modal('show')
+    }
+
+    function showModalNotif(msg){
+      ModalTitleNotif.innerHTML = msg
+      $('#modalNotif').modal('show')
+    }
+
+    function showModalConfirm(pokemon_id){
+      PokemonIdConfirm.value = pokemon_id
+      $('#modalConfirm').modal('show')
+    }
+
+    function confirmModal(){
+      releasePokemon(PokemonIdConfirm.value)
+      $("#modalConfirm").modal("hide");
+    }
+
+    function saveModal(){
+      renamePokemon(ModalPokemonId.value, document.getElementById("pokemon-nickname").value)
+      $("#modalRename").modal("hide");
+    }
+
+    $('#modalNotif').on('hidden.bs.modal', function () {
+      location.reload();
+    })
+
     function releasePokemon(pokemon_id){
-        const requestOptions = {
-          method: 'get',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-        }
-
-        fetch("http://localhost:8080/get-prime-number", requestOptions)
-          .then(response => response.text())
-          .then(response => {
-              let data;
-              try{
-                data = JSON.parse(response)
-                console.log(data)
-                if(data.IsPrime === true) {
-                  deletePokemon(pokemon_id)
-                }else {
-                  
-                }
-              } catch (err) {
-                console.log(err)
-              }
-          })
+      const requestOptions = {
+        method: 'get',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
       }
 
-      function deletePokemon(pokemon_id){
-        let payload = {
-            id : pokemon_id,
-          }
+      fetch("http://localhost:8080/get-prime-number", requestOptions)
+        .then(response => response.text())
+        .then(response => {
+            let data;
+            try{
+              data = JSON.parse(response)
+              console.log(data)
+              if(data.IsPrime === true) {
+                deletePokemon(pokemon_id)
+              }else {
+                showModalNotif("pokemon won't let go!")
+              }
+            } catch (err) {
+              console.log(err)
+            }
+        })
+    }
 
-        const requestOptions = {
-          method: 'delete',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          body : JSON.stringify(payload),
+    function deletePokemon(pokemon_id){
+      let payload = {
+          id : parseInt(pokemon_id),
         }
 
-        fetch("http://localhost:8080/release-pokemon", requestOptions)
-          .then(response => response.text())
-          .then(response => {
-              let data;
-              try{
-                data = JSON.parse(response)
-                console.log(data)
-              } catch (err) {
-                console.log(err)
-              }
-          })
+      const requestOptions = {
+        method: 'delete',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body : JSON.stringify(payload),
       }
+
+      fetch("http://localhost:8080/release-pokemon", requestOptions)
+        .then(response => response.text())
+        .then(response => {
+            let data;
+            try{
+              data = JSON.parse(response)
+              showModalNotif("You release the pokemon :(")
+              console.log(data)
+            } catch (err) {
+              console.log(err)
+            }
+        })
+    }
+
+    function renamePokemon(pokemon_id, new_nickname){
+      let payload = {
+          id : parseInt(pokemon_id),
+          nick_name : new_nickname
+        }
+
+      const requestOptions = {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body : JSON.stringify(payload),
+      }
+
+      fetch("http://localhost:8080/rename-pokemon", requestOptions)
+        .then(response => response.text())
+        .then(response => {
+            let data;
+            try{
+              data = JSON.parse(response)
+              showModalNotif("New nickname " +new_nickname)
+              console.log(data)
+            } catch (err) {
+              console.log(err)
+            }
+        })
+    }
+
+
   </script>
 {{end}}
