@@ -11,8 +11,6 @@ import (
 )
 
 type templateData struct {
-	StringMap     map[string]string
-	Data          map[string]interface{}
 	PokemonList   []structs.PokemonSource
 	PokemonDetail structs.PokemonDetail
 	MyPokemonList []structs.MyPokemon

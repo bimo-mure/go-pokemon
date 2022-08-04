@@ -54,7 +54,7 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 8080, "Server port to listen on")
 	flag.StringVar(&cfg.apiurl, "apiurl", "https://pokeapi.co/api/v2/", "Pokemon API url")
 	flag.StringVar(&cfg.env, "env", "development", "Application enviorment {development|production}")
-	flag.StringVar(&cfg.db.dsn, "dsn", "root:A19uxwkpfv96!@tcp(localhost:3306)/pokemon?parseTime=false", "DSN")
+	flag.StringVar(&cfg.db.dsn, "dsn", "root:@tcp(localhost:3306)/pokemon?parseTime=false", "DSN")
 	flag.Parse()
 
 	info_log := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
