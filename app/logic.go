@@ -29,6 +29,11 @@ func CheckPrimeNumber(num int) bool {
 	if num < 2 {
 		prime = false
 	}
+	if num == 2 {
+		prime = true
+		return prime
+	}
+
 	square_root := int(math.Sqrt(float64(num)))
 	for i := 2; i <= square_root; i++ {
 		if num%i == 0 {
@@ -40,16 +45,24 @@ func CheckPrimeNumber(num int) bool {
 
 //fibonnacci
 func Fibonacci(n int) int {
-	f := make([]int, n+1, n+2)
-	if n < 2 {
-		f = f[0:2]
+	var result int
+	var tempA int
+	var tempB int
+
+	for i := 0; i < n; i++ {
+		if i == 0 {
+			tempA = i
+			result = tempA
+		} else if i == 1 {
+			tempB = i
+			result = tempB
+		} else {
+			result = tempA + tempB
+			tempA = tempB
+			tempB = result
+		}
 	}
-	f[0] = 0
-	f[1] = 1
-	for i := 2; i <= n; i++ {
-		f[i] = f[i-1] + f[i-2]
-	}
-	return f[n]
+	return result
 }
 
 func GenerateRandomNumberPokemon() int {
